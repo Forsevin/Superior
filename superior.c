@@ -43,17 +43,17 @@ int main( int args, char *argv[] ){
 /*{{{*/
 void countFiles(){
 
-    FILE    *index = fopen("index", "r");
+    FILE    *index;
     int     lines;
     char    line[250];
     char    *file;
 
+    if( !(index = fopen("index", "r") ) )
+            Error("Could not open index, maybe the file is missing?", -1);
+
     for( lines=0; fgets( line, 250, index  ) != NULL; lines++ ){
     
         file = strtok(line, " " );
-
-        if( file == "" || file == "\n" )
-            file = "Empty line";
 
         printf("%i - %s\n", lines, file);
     }
@@ -81,8 +81,11 @@ void pull(){
 /*{{{*/    
 int get(char file[]){
 
-    FILE *index = fopen("index", "r");
+    FILE *index;
     char line[250];
+
+    if( !(index = fopen("index", "r") ) )
+        Error("Could not open index, maybe the file is missing?", -1);
 
     printf("Looking for '%s'... ", file);
 
