@@ -45,7 +45,7 @@ void countFiles(){
 
     FILE    *index = fopen("index", "r");
     int     lines;
-    char    *line;
+    char    line[250];
     char    *file;
 
     for( lines=0; fgets( line, 250, index  ) != NULL; lines++ ){
