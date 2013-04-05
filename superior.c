@@ -84,6 +84,9 @@ int get(char file[]){
     FILE *index;
     char line[250];
 
+    if( file == NULL )
+        Error("Missing argument for get", -1);
+
     if( !(index = fopen("index", "r") ) )
         Error("Could not open index, maybe the file is missing?", -1);
 
