@@ -13,11 +13,14 @@ void    checkFiles();                               // Make sure all files exist
 void    pull();                                     // Update index
 void    list( char ofile[] );                       // List the content of a file
 void    download(char *url, char out[]);            // Download a file directly form url
-void    addSrc(char url[]);
+void    addSrc(char url[]);                         // Add a source
 int     get( char file[] );                         // Get a file from repository
 char    *getfn(  char *url );                       // Return the filename from url
-char    *homedir( const char *file );
-int main( int args, char *argv[] ){
+char    *homedir( const char *file );               // Return the home directory with file
+
+
+int main( int args, char *argv[] )
+{
 
     curl_global_init(CURL_GLOBAL_ALL);
     
@@ -49,7 +52,8 @@ int main( int args, char *argv[] ){
 }
 
 /*{{{*/
-char *homedir(const char *file){
+char *homedir(const char *file)
+{
 
     char *dir;
     dir = getenv("HOME");
@@ -64,7 +68,8 @@ char *homedir(const char *file){
 /*}}}*/
 
 /*{{{*/
-void addSrc( char url[] ){
+void addSrc( char url[] )
+{
 
     // Make sure url is set
     if( url == NULL )
@@ -86,7 +91,8 @@ void addSrc( char url[] ){
  /*}}}*/
 
 /*{{{*/
-void list(char ofile[]){
+void list(char ofile[])
+{
 
     FILE    *lfile;
     int     lines;
@@ -117,7 +123,8 @@ void list(char ofile[]){
 /*}}}*/ 
 
 /*{{{*/
-void pull(){
+void pull()
+{
 
     FILE *sources = fopen( homedir("sources"), "wb");
     char *source;
@@ -132,7 +139,8 @@ void pull(){
 /*}}}*/ 
 
 /*{{{*/    
-int get(char file[]){
+int get( char file[] )
+{
 
     FILE *index;
     char line[250];
@@ -192,7 +200,8 @@ int get(char file[]){
 /*}}}*/
 
 /*{{{*/
-char* getfn( char *url){
+char* getfn( char *url)
+{
 
     char *turl = malloc (1 + strlen(url));
     strcpy(turl, url);
@@ -210,14 +219,16 @@ char* getfn( char *url){
 /*}}}*/
 
 /*{{{*/
-void Error( char message[], int status ){
+void Error( char message[], int status )
+{
     printf("%s\n", message);
     exit( status );
 }
 /*}}}*/
 
 /*{{{*/
-void printUsage(){
+void printUsage()
+{
 
     printf("usage: \n download\t Download file directly\n get \t\t Get a file from a repository \n pull \t\t Update index from sources\n add-repo\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
     exit( 0 );
@@ -226,7 +237,8 @@ void printUsage(){
 /*}}}*/
 
 /*{{{*/
-size_t writef( void *ptr, size_t size, size_t nmemb, FILE *stream ){
+size_t writef( void *ptr, size_t size, size_t nmemb, FILE *stream )
+{
 
     size_t written = fwrite(ptr, size, nmemb, stream);
     return written;
@@ -235,8 +247,8 @@ size_t writef( void *ptr, size_t size, size_t nmemb, FILE *stream ){
 
 /*{{{*/
 
-void download(char *url, char out[]){
-
+void download(char *url, char out[])
+{
     
     // Set variables
     CURL *curl;
