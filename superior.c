@@ -10,7 +10,7 @@ void    printUsage();                               // Print usage of Superior
 void    Error(char message[], int status);          // Show message and exit with status
 void    checkFiles();                               // Make sure all files exist, create them if necessary
 void    pull();                                     // Update index
-void    countFiles();                               // Count all files avaible in index
+void    list( char ofile[] );                       // List the content of a file
 void    download(char *url, char out[]);            // Download a file directly form url
 void    addSrc(char url[]);
 int     get( char file[] );                         // Get a file from repository
@@ -30,7 +30,10 @@ int main( int args, char *argv[] ){
         pull();
 
     else if( !strcmp(ARG, "lf") )
-        countFiles();
+        list("index");
+
+    else if( !strcmp(ARG, "ls") )
+        list("sources");
 
     else if( !strcmp(ARG, "help") )
         printUsage();
@@ -44,6 +47,7 @@ int main( int args, char *argv[] ){
 
 }
 
+/*{{{*/
 void addSrc( char url[] ){
 
     // Make sure url is set
@@ -63,29 +67,38 @@ void addSrc( char url[] ){
     return;
 
 }
+ /*}}}*/
 
 /*{{{*/
-void countFiles(){
+void list(char ofile[]){
 
-    FILE    *index;
+    FILE    *lfile;
     int     lines;
     char    line[250];
-    char    *file;
+    char    *cont;
 
-    if( !(index = fopen("index", "r") ) )
-            Error("Could not open index, maybe the file is missing?", -1);
+    if( !(lfile = fopen(ofile, "r") ) )
+            Error("Could not open file, maybe the file is missing?", -1);
 
-    for( lines=0; fgets( line, 250, index  ) != NULL; lines++ ){
+    for( lines=0; fgets( line, 250, lfile  ) != NULL; lines++ ){
     
-        file = strtok(line, " " );
+        cont = strtok(line, " " );
 
-        printf("%i - %s\n", lines, file);
+        int i;
+        // Remove newlines
+        for( i = 0; i < strlen(cont); i++ )
+            if(cont[i] == '\n')
+                cont[i] = '\0';
+
+        printf("%i - %s\n", lines, cont);
     }
 
     printf("Total: %i\n", lines);
    
+    return;
+
 }
-/*}}}*/
+/*}}}*/ 
 
 /*{{{*/
 void pull(){
@@ -100,7 +113,7 @@ void pull(){
         
     }
 }
-/*}}}*/
+/*}}}*/ 
 
 /*{{{*/    
 int get(char file[]){
