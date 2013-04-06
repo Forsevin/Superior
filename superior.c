@@ -10,7 +10,7 @@
 void    printUsage();                               // Print usage of Superior
 void    Error(char message[], int status);          // Show message and exit with status
 void    checkFiles();                               // Make sure all files exist, create them if necessary
-void    pull();                                     // Update index
+void    update();                                   // Update index
 void    list( char ofile[] );                       // List the content of a file
 void    download(char *url, char out[]);            // Download a file directly form url
 void    addSrc(char url[]);                         // Add a source
@@ -30,8 +30,8 @@ int main( int args, char *argv[] )
     else if( !strcmp(ARG, "get") )
         get( argv[2] );
     
-    else if( !strcmp(ARG, "pull") )
-        pull();
+    else if( !strcmp(ARG, "update") )
+        update();
 
     else if( !strcmp(ARG, "lf") )
         list("index");
@@ -51,7 +51,9 @@ int main( int args, char *argv[] )
 
 }
 
-/*{{{*/
+
+
+/* Return home directory with file */
 char *homedir(const char *file)
 {
 
@@ -65,11 +67,12 @@ char *homedir(const char *file)
 
     return full;
 }
-/*}}}*/
 
-/*{{{*/
+
+
+/* Add a source to sources */
 void addSrc( char url[] )
-{
+{ 
 
     // Make sure url is set
     if( url == NULL )
@@ -88,9 +91,10 @@ void addSrc( char url[] )
     return;
 
 }
- /*}}}*/
 
-/*{{{*/
+
+
+/* List a files content */
 void list(char ofile[])
 {
 
@@ -120,25 +124,19 @@ void list(char ofile[])
     return;
 
 }
-/*}}}*/ 
 
-/*{{{*/
-void pull()
+
+
+/* Update local index from sources */
+void update()
 {
 
-    FILE *sources = fopen( homedir("sources"), "wb");
-    char *source;
 
-    while(fgets(source, 250, sources) != NULL){
-    
-        printf("Found %s\n", source);
-        printf("\t| Retrieving index... \t");
-        
-    }
 }
-/*}}}*/ 
 
-/*{{{*/    
+
+
+/* Get a file from index */
 int get( char file[] )
 {
 
@@ -197,9 +195,10 @@ int get( char file[] )
 
     puts("Couldn't find file");
 }
-/*}}}*/
 
-/*{{{*/
+
+
+/* Return filename from url */
 char* getfn( char *url)
 {
 
@@ -216,37 +215,38 @@ char* getfn( char *url)
  
     return lastocr;
 }
-/*}}}*/
 
-/*{{{*/
+
+
+/* Print error message and exit */
 void Error( char message[], int status )
 {
     printf("%s\n", message);
     exit( status );
 }
-/*}}}*/
 
-/*{{{*/
+
+
+/* Print commands */
 void printUsage()
 {
 
-    printf("usage: \n download\t Download file directly\n get \t\t Get a file from a repository \n pull \t\t Update index from sources\n add-repo\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
+    printf("usage: \n download\t Download file directly\n get \t\t Get a file from a repository \n pull \t\t Update index from sources\n add-src\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
     exit( 0 );
 
 } 
-/*}}}*/
 
-/*{{{*/
+/* Write to file */
 size_t writef( void *ptr, size_t size, size_t nmemb, FILE *stream )
 {
 
     size_t written = fwrite(ptr, size, nmemb, stream);
     return written;
 }
-/*}}}*/
 
-/*{{{*/
 
+
+/* Download  a file*/
 void download(char *url, char out[])
 {
     
@@ -269,4 +269,3 @@ void download(char *url, char out[])
 
 }
 
-/*}}}*/
