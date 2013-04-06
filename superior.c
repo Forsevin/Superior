@@ -6,6 +6,7 @@
 
 #define ARG argv[1]
 
+
 void    printUsage();                               // Print usage of Superior
 void    Error(char message[], int status);          // Show message and exit with status
 void    checkFiles();                               // Make sure all files exist, create them if necessary
@@ -15,7 +16,7 @@ void    download(char *url, char out[]);            // Download a file directly 
 void    addSrc(char url[]);
 int     get( char file[] );                         // Get a file from repository
 char    *getfn(  char *url );                       // Return the filename from url
-
+char    *homedir( const char *file );
 int main( int args, char *argv[] ){
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -48,6 +49,21 @@ int main( int args, char *argv[] ){
 }
 
 /*{{{*/
+char *homedir(const char *file){
+
+    char *dir;
+    dir = getenv("HOME");
+    char *superiorPath = "/Superior/";
+    char *full = malloc( strlen(file) + strlen(superiorPath) + strlen(dir) + 1 );
+    strcpy(full, dir);
+    strcat(full, superiorPath);
+    strcat(full, file);
+
+    return full;
+}
+/*}}}*/
+
+/*{{{*/
 void addSrc( char url[] ){
 
     // Make sure url is set
@@ -56,7 +72,7 @@ void addSrc( char url[] ){
 
     FILE *sources;
     // Open sources
-    if( (sources = fopen("sources", "a")) == NULL )
+    if( (sources = fopen(homedir("sources"), "a")) == NULL )
         Error("Couldn't open sources, maybe the file is missing?", -1);
 
     // Update sources
@@ -77,7 +93,7 @@ void list(char ofile[]){
     char    line[250];
     char    *cont;
 
-    if( !(lfile = fopen(ofile, "r") ) )
+    if( !(lfile = fopen( homedir(ofile), "r") ) )
             Error("Could not open file, maybe the file is missing?", -1);
 
     for( lines=0; fgets( line, 250, lfile  ) != NULL; lines++ ){
@@ -103,7 +119,7 @@ void list(char ofile[]){
 /*{{{*/
 void pull(){
 
-    FILE *sources = fopen("sources", "wb");
+    FILE *sources = fopen( homedir("sources"), "wb");
     char *source;
 
     while(fgets(source, 250, sources) != NULL){
@@ -124,7 +140,7 @@ int get(char file[]){
     if( file == NULL )
         Error("Missing argument for get", -1);
 
-    if( !(index = fopen("index", "r") ) )
+    if( !(index = fopen( homedir("index"), "r") ) )
         Error("Could not open index, maybe the file is missing?", -1);
 
     printf("Looking for '%s'... ", file);
@@ -229,7 +245,7 @@ void download(char *url, char out[]){
     curl = curl_easy_init();
 
     // Download
-    src = fopen(out, "wb");
+    src = fopen( homedir(out), "wb");
     curl_easy_setopt( curl, CURLOPT_URL,            url     );
     curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION,  writef  );
     curl_easy_setopt( curl, CURLOPT_WRITEDATA,      src     );
