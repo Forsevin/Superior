@@ -12,6 +12,7 @@ void    checkFiles();                               // Make sure all files exist
 void    pull();                                     // Update index
 void    countFiles();                               // Count all files avaible in index
 void    download(char *url, char out[]);            // Download a file directly form url
+void    addSrc(char url[]);
 int     get( char file[] );                         // Get a file from repository
 char    *getfn(  char *url );                       // Return the filename from url
 
@@ -33,10 +34,33 @@ int main( int args, char *argv[] ){
 
     else if( !strcmp(ARG, "help") )
         printUsage();
+    
+    else if( !strcmp(ARG, "add-src") )
+        addSrc( argv[2] );
 
     else printUsage();
 
     return 0;
+
+}
+
+void addSrc( char url[] ){
+
+    // Make sure url is set
+    if( url == NULL )
+        Error("Missing argument for add-src", -1);
+
+    FILE *sources;
+    // Open sources
+    if( (sources = fopen("sources", "a")) == NULL )
+        Error("Couldn't open sources, maybe the file is missing?", -1);
+
+    // Update sources
+    fputs(url, sources);    // Put URL
+    fputs("\n", sources);   // Put a newline as well
+    fclose( sources );
+
+    return;
 
 }
 
