@@ -183,6 +183,9 @@ char* getfn( char *url){
     char * lastocr;
     lastocr =  strrchr(turl, '/');
 
+    if(lastocr == NULL)
+        Error("Invalid URL", -1);
+
     if(lastocr[0] == '/')
         memmove( lastocr, lastocr+1, strlen(lastocr) );
  
