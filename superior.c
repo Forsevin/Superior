@@ -108,8 +108,10 @@ void list(char ofile[])
     char    line[250];
     char    *cont;
 
-    if( !(lfile = fopen( homedir(ofile), "a") ) )
+    if( !(lfile = fopen( homedir(ofile), "r") ) )
             Error("Could not open file, maybe the file is missing?", -1);
+
+    printf("Listing: %s\n", homedir(ofile));
 
     for( lines=0; fgets( line, 250, lfile  ) != NULL; lines++ ){
     
