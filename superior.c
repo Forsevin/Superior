@@ -137,14 +137,21 @@ void setup()
 {
 
     printf("Settings up Superior...\n");
+    
     // Create directory
-    int dir = 0;
-    dir = mkdir(homedir(""), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
+    int dir, ddir;
+    dir  = mkdir(homedir(""), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
+    ddir = mkdir(homedir("downloads"), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
     if(dir < 0)
-        printf("\t |Could not create directory in %s (maybe it already exist?)\n", homedir(""));
+        printf("\t |Could not create directory at %s (maybe it already exist?)\n", homedir(""));
     else
         printf("\t |Directory created at %s\n", homedir(""));
+
+    if(ddir < 0)
+        printf("\t |Could not create directory at %s (maybe it already exist?)\n", homedir("downloads"));
+    else
+        printf("\t |Directory created at %s\n", homedir("downloads"));
 
     // Create index  & source
     FILE *file;
