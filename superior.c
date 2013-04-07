@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<curl/curl.h>
 #include<curl/easy.h>
+#include<sys/stat.h>
 
 #define ARG argv[1]
 
@@ -14,6 +15,7 @@ void    update();                                   // Update index
 void    list( char ofile[] );                       // List the content of a file
 void    download(char *url, char out[]);            // Download a file directly form url
 void    addSrc(char url[]);                         // Add a source
+void    setup();                                    // Setup Superior files and folders
 int     get( char file[] );                         // Get a file from repository
 char    *getfn(  char *url );                       // Return the filename from url
 char    *homedir( const char *file );               // Return the home directory with file
@@ -41,6 +43,9 @@ int main( int args, char *argv[] )
 
     else if( !strcmp(ARG, "help") )
         printUsage();
+    
+    else if( !strcmp(ARG, "setup") )
+        setup();
     
     else if( !strcmp(ARG, "add-src") )
         addSrc( argv[2] );
@@ -103,7 +108,7 @@ void list(char ofile[])
     char    line[250];
     char    *cont;
 
-    if( !(lfile = fopen( homedir(ofile), "r") ) )
+    if( !(lfile = fopen( homedir(ofile), "a") ) )
             Error("Could not open file, maybe the file is missing?", -1);
 
     for( lines=0; fgets( line, 250, lfile  ) != NULL; lines++ ){
@@ -127,9 +132,42 @@ void list(char ofile[])
 
 
 
+/* Create files */
+void setup()
+{
+
+    printf("Settings up Superior...\n");
+    // Create directory
+    int dir = 0;
+    dir = mkdir(homedir(""), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
+
+    if(dir < 0)
+        printf("\t |Could not create directory in %s (maybe it already exist?)\n", homedir(""));
+    else
+        printf("\t |Directory created at %s\n", homedir(""));
+
+    // Create index  & source
+    FILE *file;
+    if( (file = fopen(homedir("index"), "a" ) ) == NULL )
+        printf("\t |Could not create '%s'\n", homedir("index"));
+    else
+        printf("\t |Index created in '%s'\n", homedir("index")); 
+    
+    fclose(file);
+
+    if( (file = fopen(homedir("sources"), "a")) == NULL )
+        printf("\t |Could not create '%s'\n", homedir("sources"));
+    else
+        printf("\t |Sources created in '%s'\n", homedir("sources"));
+    
+    return;
+}
+
+
 /* Update local index from sources */
 void update()
 {
+
 
 
 }
@@ -231,7 +269,7 @@ void Error( char message[], int status )
 void printUsage()
 {
 
-    printf("usage: \n download\t Download file directly\n get \t\t Get a file from a repository \n pull \t\t Update index from sources\n add-src\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
+    printf("usage: \n Setup\t\t Setup Superior\n get \t\t Get a file from a repository \n pull \t\t Update index from sources\n add-src\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
     exit( 0 );
 
 } 
