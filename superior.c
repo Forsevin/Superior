@@ -16,6 +16,7 @@ void    list( char ofile[] );                       // List the content of a fil
 void    download(char *url, char out[]);            // Download a file directly form url
 void    addSrc(char url[]);                         // Add a source
 void    setup();                                    // Setup Superior files and folders
+void    removeNl( char *string );                   // Remove newline from string
 int     get( char file[] );                         // Get a file from repository
 char    *getfn(  char *url );                       // Return the filename from url
 char    *homedir( const char *file );               // Return the home directory with file
@@ -105,25 +106,25 @@ void list(char ofile[])
 
     FILE    *lfile;
     int     lines;
-    char    line[250];
+    char    line[251];
+    char    description[51];
     char    *cont;
 
     if( !(lfile = fopen( homedir(ofile), "r") ) )
             Error("Could not open file, maybe the file is missing?", -1);
 
-    printf("Listing: %s\n", homedir(ofile));
-
-    for( lines=0; fgets( line, 250, lfile  ) != NULL; lines++ ){
+    for( lines=0; fgets( line, 250, lfile  ); lines++ ){
     
         cont = strtok(line, " " );
 
-        int i;
-        // Remove newlines
-        for( i = 0; i < strlen(cont); i++ )
-            if(cont[i] == '\n')
-                cont[i] = '\0';
+        // Make sure it's not a file description
+        if(cont[0] == '\t')
+            continue;
 
-        printf("%i - %s\n", lines, cont);
+        // Remove newlines
+        removeNl(cont);    
+
+        printf("| %s\n", cont);
     }
 
     printf("Total: %i\n", lines);
@@ -138,39 +139,46 @@ void list(char ofile[])
 void setup()
 {
 
+    int dir, ddir;
+    FILE *file;
+   
     printf("Settings up Superior...\n");
     
     // Create directory
-    int dir, ddir;
-    dir  = mkdir(homedir(""), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
-    ddir = mkdir(homedir("downloads"), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    dir  = mkdir(homedir(""),           S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
+    ddir = mkdir(homedir("downloads"),  S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
 
     if(dir < 0)
-        printf("\t |Could not create directory at %s (maybe it already exist?)\n", homedir(""));
+        printf("\t | Could not create directory at %s (maybe it already exist?)\n", homedir(""));
     else
-        printf("\t |Directory created at %s\n", homedir(""));
+        printf("\t | Directory created at %s\n", homedir(""));
+
 
     if(ddir < 0)
-        printf("\t |Could not create directory at %s (maybe it already exist?)\n", homedir("downloads"));
+        printf("\t | Could not create directory at %s (maybe it already exist?)\n", homedir("downloads"));
     else
-        printf("\t |Directory created at %s\n", homedir("downloads"));
+        printf("\t | Directory created at %s\n", homedir("downloads"));
+
 
     // Create index  & source
-    FILE *file;
     if( (file = fopen(homedir("index"), "a" ) ) == NULL )
-        printf("\t |Could not create '%s'\n", homedir("index"));
+        printf("\t | Could not create '%s'\n", homedir("index"));
     else
-        printf("\t |Index created in '%s'\n", homedir("index")); 
+        printf("\t | Index created in '%s'\n", homedir("index")); 
     
+
     fclose(file);
 
     if( (file = fopen(homedir("sources"), "a")) == NULL )
-        printf("\t |Could not create '%s'\n", homedir("sources"));
+        printf("\t | Could not create '%s'\n", homedir("sources"));
     else
-        printf("\t |Sources created in '%s'\n", homedir("sources"));
+        printf("\t | Sources created in '%s'\n", homedir("sources"));
     
+    fclose(file);
+
     return;
 }
+
 
 
 /* Update local index from sources */
@@ -183,12 +191,24 @@ void update()
 
 
 
+/* Remove newline from string */
+void removeNl( char *string  ){
+
+    int i;
+    for(i=0; i < strlen(string); i++ ) 
+        if(string[i] == '\n')
+            string[i] = '\0';
+}
+
+
+
 /* Get a file from index */
 int get( char file[] )
 {
 
     FILE *index;
     char line[250];
+    char description[51];
 
     if( file == NULL )
         Error("Missing argument for get", -1);
@@ -208,20 +228,29 @@ int get( char file[] )
             
             printf(" found it!\n");
 
-            // Package information
+            // File information
             char *url       = strtok( NULL, " " );
-            char *version   = strtok( NULL, " " );
-            char *file      = getfn(url);
-            
-            // Remove \n from version
-            int i;
-            for(i=0; i < strlen(version); i++ )
-                if(version[i] == '\n')
-                    version[i] = '\0';
+            //char *version   = strtok( NULL, " " );    Currently removed since it never really served any purpose
+            char *file      = getfn(url); 
+
+            // Get description
+            if(fgets(description, 50, index) == NULL){
+                printf("[Warning] Missing description");
+
+            }else if(description[0] != '\t'){
+                printf("[Warning] Missing description or wrongly formated\n");
+            }
+
+            if(url == NULL || file == NULL)
+                Error("Information was missing about file", -1);
+
+            // Remove newlines
+            removeNl(description);
+            removeNl(url);
 
             //Print info
-            printf(" -name:\t%s\n -url:\t%s\n -vers:\t%s\n -file:\t%s\n", name, url, version, file);
-            printf("Continue? [Y/n]\n");
+            printf(" -name:\t%s\n -url:\t%s\n -desc:%s\n -file:\t%s\n", name, url, description, file);
+            printf("Continue? [Y/n]");
 
             // Download
             char prompt = getchar(); 
@@ -268,7 +297,7 @@ char* getfn( char *url)
 /* Print error message and exit */
 void Error( char message[], int status )
 {
-    printf("%s\n", message);
+    printf("[Failure] %s\n", message);
     exit( status );
 }
 
