@@ -17,10 +17,15 @@ void    download(char *url, char out[]);            // Download a file directly 
 void    addSrc(char url[]);                         // Add a source
 void    setup();                                    // Setup Superior files and folders
 void    removeNl( char *string );                   // Remove newline from string
-int     get( char file[] );                         // Get a file from repository
+void     get( char file[] );                         // Get a file from repository
 char    *getfn(  char *url );                       // Return the filename from url
 char    *homedir( const char *file );               // Return the home directory with file
 
+
+/*
+ *  Code licensed under GPL (GNU General Public License) 
+ *  See: http://www.gnu.org/licenses/gpl.html
+*/
 
 int main( int args, char *argv[] )
 {
@@ -79,7 +84,6 @@ char *homedir(const char *file)
 /* Add a source to sources */
 void addSrc( char url[] )
 { 
-
     // Make sure url is set
     if( url == NULL )
         Error("Missing argument for add-src", -1);
@@ -148,6 +152,7 @@ void setup()
     dir  = mkdir(homedir(""),           S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
     ddir = mkdir(homedir("downloads"),  S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
 
+    // Check if folder were created sucessfully
     if(dir < 0)
         printf("\t | Could not create directory at %s (maybe it already exist?)\n", homedir(""));
     else
@@ -198,12 +203,14 @@ void removeNl( char *string  ){
     for(i=0; i < strlen(string); i++ ) 
         if(string[i] == '\n')
             string[i] = '\0';
+
+    return;
 }
 
 
 
 /* Get a file from index */
-int get( char file[] )
+void get( char file[] )
 {
 
     FILE *index;
@@ -235,15 +242,18 @@ int get( char file[] )
 
             // Get description
             if(fgets(description, 50, index) == NULL){
-                printf("[Warning] Missing description");
+                printf("[Warning] Missing description\n");
+                strcpy(description, " (missing)");
 
             }else if(description[0] != '\t'){
+                
                 printf("[Warning] Missing description or wrongly formated\n");
+                strcpy(description, " (missing)");
             }
 
-            if(url == NULL || file == NULL)
+            if(url == NULL || file == NULL){
                 Error("Information was missing about file", -1);
-
+            }
             // Remove newlines
             removeNl(description);
             removeNl(url);
@@ -259,17 +269,18 @@ int get( char file[] )
                 printf("downloading file...");
                 download(url, file);
                 printf(" Done!\n");
-                return 0;
+                return;
             
             } else {
 
                 puts("Aborting...");
-                return 0;
+                return;
             }
         }
     }
 
     puts("Couldn't find file");
+    return;
 }
 
 
@@ -307,7 +318,7 @@ void Error( char message[], int status )
 void printUsage()
 {
 
-    printf("usage: \n Setup\t\t Setup Superior\n get \t\t Get a file from a repository \n pull \t\t Update index from sources\n add-src\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
+    printf("usage: \n Setup\t\t Setup Superior\n get \t\t Get a file from a repository \n update \t\t Update index from sources\n add-src\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
     exit( 0 );
 
 } 
