@@ -1,0 +1,7 @@
+In order of importance.
+
+The update command which pulls the content from sources and put them in ~/Superior/index
+
+Check wether the content returned by Curl is a file or a 404
+
+Format the output in a more readable form.
