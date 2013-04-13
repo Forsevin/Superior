@@ -124,8 +124,10 @@ void list(char ofile[])
         cont = strtok(line, " " );
 
         // Make sure it's not a file description
-        if(cont[0] == '\t')
+        if(cont[0] == '\t'){
+            lines--;
             continue;
+        }
 
         // Remove newlines
         removeNl(cont);    
