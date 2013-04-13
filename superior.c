@@ -17,7 +17,7 @@ void    download(char *url, char out[]);            // Download a file directly 
 void    addSrc(char url[]);                         // Add a source
 void    setup();                                    // Setup Superior files and folders
 void    removeNl( char *string );                   // Remove newline from string
-void     get( char file[] );                         // Get a file from repository
+void    get( char file[] );                         // Get a file from repository
 char    *getfn(  char *url );                       // Return the filename from url
 char    *homedir( const char *file );               // Return the home directory with file
 
@@ -117,6 +117,8 @@ void list(char ofile[])
     if( !(lfile = fopen( homedir(ofile), "r") ) )
             Error("Could not open file, maybe the file is missing?", -1);
 
+    printf("Listing: %s\n", homedir(ofile));
+
     for( lines=0; fgets( line, 250, lfile  ); lines++ ){
     
         cont = strtok(line, " " );
@@ -190,7 +192,7 @@ void setup()
 void update()
 {
 
-
+    
 
 }
 
@@ -318,7 +320,7 @@ void Error( char message[], int status )
 void printUsage()
 {
 
-    printf("usage: \n Setup\t\t Setup Superior\n get \t\t Get a file from a repository \n update \t\t Update index from sources\n add-src\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
+    printf("usage: \n Setup\t\t Setup Superior\n get \t\t Get a file from a repository \n update \t Update index from sources\n add-src\t Add new repository\n ls\t\t list all sources\n lf \t\t List all files avaible in index\n" );
     exit( 0 );
 
 } 
@@ -343,12 +345,25 @@ void download(char *url, char out[])
     CURLcode res;
     curl = curl_easy_init();
 
+    // FIXME
+    // The last letter in out[] is screwed up, A more convenient solution would be preferred
+    out[strlen(out) -1] = '\0';
+
     // Download
     src = fopen( homedir(out), "wb");
     curl_easy_setopt( curl, CURLOPT_URL,            url     );
     curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION,  writef  );
     curl_easy_setopt( curl, CURLOPT_WRITEDATA,      src     );
     res = curl_easy_perform( curl );
+    
+    // Check return code
+    int creturn;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &creturn);
+
+    if( creturn != 200 ) { 
+        printf("\nCould not download file, return code %i\n", creturn);
+        exit( EXIT_FAILURE );
+    }
 
     // Finish
     curl_easy_cleanup( curl );
